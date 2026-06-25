@@ -7,10 +7,13 @@ with real git's object store.
 
 | Name | Status | Description |
 |------|--------|-------------|
-| Plumbing | 🔜 | Object store, SHA-1, zlib |
-| Staging | 🔜 | Index, `rit add` |
-| Snapshot | 🔜 | `rit commit`, HEAD, refs |
-| Clarity | 🔜 | `rit status`, `rit log`, `rit cat-file` |
+| Plumbing | ✅ | Object store, SHA-1, zlib |
+| Staging | ✅ | Index, `rit add` |
+| Snapshot | ✅ | `rit commit`, HEAD, refs |
+| Clarity | ✅ | `rit status`, `rit log`, `rit cat-file` |
+| Branches | 🔜 | `rit branch`, `rit checkout` |
+| Diff | 🔜 | `rit diff` |
+| Remote | 🔜 | `rit clone`, `rit push`, `rit fetch` |
 
 ## Usage
 

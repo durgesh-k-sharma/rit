@@ -7,7 +7,7 @@ use crate::index::{Index, IndexEntry};
 use crate::object::blob::Blob;
 use crate::object::write_object;
 
-fn is_ignored(path: &Path, repo: &Repo) -> bool {
+pub fn is_ignored(path: &Path, repo: &Repo) -> bool {
     if path.components().any(|c| c.as_os_str() == ".git") {
         return true;
     }

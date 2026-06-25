@@ -22,6 +22,10 @@ fn main() -> anyhow::Result<()> {
             let repo = repo::Repo::find_repository()?;
             commands::commit::cmd_commit(&message, &repo)
         }
+        Command::Status => {
+            let repo = repo::Repo::find_repository()?;
+            commands::status::cmd_status(&repo)
+        }
         _ => {
             let _repo = repo::Repo::find_repository()?;
             Ok(())

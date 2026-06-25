@@ -30,9 +30,9 @@ fn main() -> anyhow::Result<()> {
             let repo = repo::Repo::find_repository()?;
             commands::log::cmd_log(&repo)
         }
-        _ => {
-            let _repo = repo::Repo::find_repository()?;
-            Ok(())
+        Command::CatFile { type_only, pretty_print, size, object } => {
+            let repo = repo::Repo::find_repository()?;
+            commands::cat_file::cmd_cat_file(type_only, pretty_print, size, &object, &repo)
         }
     };
 

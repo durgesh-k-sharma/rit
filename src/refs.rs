@@ -24,7 +24,6 @@ pub fn resolve_head(repo: &Repo) -> Result<Option<String>> {
     }
 }
 
-#[allow(dead_code)]
 pub fn read_ref(repo: &Repo, ref_path: &str) -> Result<Option<String>> {
     let ref_file = repo.git_dir.join(ref_path);
     if ref_file.exists() {

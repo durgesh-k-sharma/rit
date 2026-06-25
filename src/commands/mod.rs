@@ -4,3 +4,5 @@ pub mod commit;
 pub mod status;
 pub mod log;
 pub mod cat_file;
+pub mod branch;
+pub mod checkout;

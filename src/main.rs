@@ -34,6 +34,14 @@ fn main() -> anyhow::Result<()> {
             let repo = repo::Repo::find_repository()?;
             commands::cat_file::cmd_cat_file(type_only, pretty_print, size, &object, &repo)
         }
+        Command::Branch { name, delete } => {
+            let repo = repo::Repo::find_repository()?;
+            commands::branch::cmd_branch(name, delete, &repo)
+        }
+        Command::Checkout { target, new_branch, start_point, force } => {
+            let repo = repo::Repo::find_repository()?;
+            commands::checkout::cmd_checkout(&target, new_branch, start_point.as_deref(), force, &repo)
+        }
     };
 
     if let Err(e) = result {

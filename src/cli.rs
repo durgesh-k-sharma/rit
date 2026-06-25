@@ -41,4 +41,31 @@ pub enum Command {
         size: bool,
         object: String,
     },
+
+    /// Manage branches
+    Branch {
+        /// Branch to create or delete
+        name: Option<String>,
+
+        /// Delete the branch
+        #[arg(short = 'd', long = "delete")]
+        delete: bool,
+    },
+
+    /// Switch branches or restore working tree files
+    Checkout {
+        /// Branch name to checkout
+        target: String,
+
+        /// Create and switch to a new branch
+        #[arg(short = 'b')]
+        new_branch: bool,
+
+        /// Optional start point for -b
+        start_point: Option<String>,
+
+        /// Discard local changes (no safety check)
+        #[arg(short = 'f', long = "force")]
+        force: bool,
+    },
 }

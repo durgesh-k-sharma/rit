@@ -163,9 +163,7 @@ fn replace_index(repo: &Repo, target_files: &BTreeMap<PathBuf, (String, u32)>) -
 
     for (path, (sha, mode)) in target_files {
         let full_path = repo.work_dir.join(path);
-        let metadata = fs::metadata(&full_path).unwrap_or_else(|_| {
-            fs::metadata(".").unwrap()
-        });
+        let metadata = fs::metadata(&full_path).or_else(|_| fs::metadata("."))?;
 
         let relative_str = path.to_string_lossy().replace('\\', "/");
         let epoch = std::time::UNIX_EPOCH;

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::error::*;
 use crate::repo::Repo;
 use crate::object::read_object;
@@ -13,14 +15,26 @@ pub fn cmd_log(repo: &Repo) -> Result<()> {
         }
     };
 
-    let mut current_sha = Some(head_sha);
+    let mut ref_map: HashMap<String, Vec<String>> = HashMap::new();
+    if let Ok(branches) = refs::list_local_branches(&repo.git_dir) {
+        for branch in &branches {
+            if let Some(sha) = refs::read_ref(repo, &format!("refs/heads/{}", branch))
+                .ok().flatten()
+            {
+                ref_map.entry(sha).or_default().push(branch.clone());
+            }
+        }
+    }
+
+    let current_branch = refs::current_branch_name(&repo.git_dir)?;
+
+    let mut current_sha = Some(head_sha.clone());
 
     while let Some(sha) = current_sha {
         let (_, content, _) = read_object(repo, &sha)?;
         let text = String::from_utf8_lossy(&content);
         let (headers, msg) = text.split_once("\n\n").unwrap_or((&text, ""));
 
-        // Parse headers
         let mut _tree = String::new();
         let mut parent = None;
         let mut author_name = String::new();
@@ -34,13 +48,33 @@ pub fn cmd_log(repo: &Repo) -> Result<()> {
             } else if let Some(rest) = line.strip_prefix("parent ") {
                 parent = Some(rest.to_string());
             } else if let Some(rest) = line.strip_prefix("author ") {
-                parse_author_line(rest, &mut author_name, &mut author_email, &mut timestamp, &mut tz_offset);
+                parse_author_line(rest, &mut author_name, &mut author_email,
+                                  &mut timestamp, &mut tz_offset);
+            }
+        }
+
+        let mut decorations: Vec<String> = Vec::new();
+        if let Some(ref cur_branch) = current_branch
+            && sha == head_sha
+        {
+            decorations.push(format!("HEAD -> {}", cur_branch));
+        }
+        if let Some(branches) = ref_map.get(&sha) {
+            for branch in branches {
+                if current_branch.as_deref() == Some(branch) && sha == head_sha {
+                    continue;
+                }
+                decorations.push(branch.clone());
             }
         }
 
         let date_str = format_timestamp(timestamp, &tz_offset);
 
-        println!("commit {}", sha);
+        if decorations.is_empty() {
+            println!("commit {}", sha);
+        } else {
+            println!("commit {} ({})", sha, decorations.join(", "));
+        }
         println!("Author: {} <{}>", author_name, author_email);
         println!("Date:   {}", date_str);
         println!();
@@ -49,7 +83,6 @@ pub fn cmd_log(repo: &Repo) -> Result<()> {
 
         current_sha = parent;
     }
-
     Ok(())
 }
 

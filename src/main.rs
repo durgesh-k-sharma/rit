@@ -18,6 +18,10 @@ fn main() -> anyhow::Result<()> {
             let repo = repo::Repo::find_repository()?;
             commands::add::cmd_add(&pathspecs, &repo)
         }
+        Command::Commit { message } => {
+            let repo = repo::Repo::find_repository()?;
+            commands::commit::cmd_commit(&message, &repo)
+        }
         _ => {
             let _repo = repo::Repo::find_repository()?;
             Ok(())

@@ -89,10 +89,8 @@ fn parse_tz_offset(s: &str) -> i32 {
 }
 
 fn get_current_branch(repo: &Repo) -> String {
-    if let Ok(head) = refs::read_head(repo) {
-        if let Some(ref_path) = head.strip_prefix("ref: refs/heads/") {
-            return ref_path.to_string();
-        }
+    if let Ok(head) = refs::read_head(repo) && let Some(ref_path) = head.strip_prefix("ref: refs/heads/") {
+        return ref_path.to_string();
     }
     "HEAD".to_string()
 }

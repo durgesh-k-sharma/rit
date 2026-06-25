@@ -1,6 +1,7 @@
 use crate::error::*;
 use crate::repo::Repo;
 use std::fs;
+use std::path::Path;
 
 pub fn read_head(repo: &Repo) -> Result<String> {
     let content = fs::read_to_string(repo.head_path())?;
@@ -61,6 +62,53 @@ pub fn update_head_ref(repo: &Repo, sha: &str) -> Result<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
+pub fn list_local_branches(git_dir: &Path) -> Result<Vec<String>> {
+    let heads_dir = git_dir.join("refs").join("heads");
+    if !heads_dir.is_dir() {
+        return Ok(Vec::new());
+    }
+    let mut branches: Vec<String> = Vec::new();
+    for entry in fs::read_dir(&heads_dir)? {
+        let entry = entry?;
+        if entry.file_type()?.is_file() && let Some(name) = entry.file_name().to_str() {
+            branches.push(name.to_string());
+        }
+    }
+    branches.sort();
+    Ok(branches)
+}
+
+#[allow(dead_code)]
+pub fn branch_exists(git_dir: &Path, name: &str) -> bool {
+    git_dir.join("refs").join("heads").join(name).exists()
+}
+
+#[allow(dead_code)]
+pub fn delete_branch(git_dir: &Path, name: &str) -> Result<()> {
+    let path = git_dir.join("refs").join("heads").join(name);
+    if !path.exists() {
+        return Err(RitError::BranchNotFound(name.to_string()));
+    }
+    fs::remove_file(path)?;
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub fn current_branch_name(git_dir: &Path) -> Result<Option<String>> {
+    let head_path = git_dir.join("HEAD");
+    if !head_path.exists() {
+        return Ok(None);
+    }
+    let content = fs::read_to_string(head_path)?;
+    let trimmed = content.trim();
+    if let Some(ref_path) = trimmed.strip_prefix("ref: refs/heads/") {
+        Ok(Some(ref_path.to_string()))
+    } else {
+        Ok(None)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -97,5 +145,36 @@ mod tests {
         update_head(&repo, sha).unwrap();
         let resolved = resolve_head(&repo).unwrap();
         assert_eq!(resolved, Some(sha.to_string()));
+    }
+
+    #[test]
+    fn test_list_local_branches_sorted() {
+        use std::fs;
+        let tmp = TempDir::new().unwrap();
+        let git_dir = tmp.path().join(".git");
+        let heads = git_dir.join("refs").join("heads");
+        fs::create_dir_all(&heads).unwrap();
+        fs::write(heads.join("zebra"), "abc\n").unwrap();
+        fs::write(heads.join("alpha"), "def\n").unwrap();
+        fs::write(heads.join("beta"), "ghi\n").unwrap();
+        let branches = list_local_branches(&git_dir).unwrap();
+        assert_eq!(branches, vec!["alpha", "beta", "zebra"]);
+    }
+
+    #[test]
+    fn test_delete_branch_not_found() {
+        let (repo, _tmp) = setup_repo();
+        assert!(delete_branch(&repo.git_dir, "nonexistent").is_err());
+    }
+
+    #[test]
+    fn test_current_branch_name_detached() {
+        let tmp = TempDir::new().unwrap();
+        let git_dir = tmp.path().join(".git");
+        fs::create_dir_all(git_dir.join("refs").join("heads")).unwrap();
+        let sha = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
+        fs::write(git_dir.join("HEAD"), format!("{}\n", sha)).unwrap();
+        let result = current_branch_name(&git_dir).unwrap();
+        assert_eq!(result, None);
     }
 }

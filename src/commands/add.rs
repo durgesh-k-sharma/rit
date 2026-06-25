@@ -15,25 +15,23 @@ pub fn is_ignored(path: &Path, repo: &Repo) -> bool {
         return false;
     }
     let gitignore_path = repo.work_dir.join(".gitignore");
-    if gitignore_path.exists() {
-        if let Ok(content) = fs::read_to_string(&gitignore_path) {
-            for line in content.lines() {
-                let line = line.trim();
-                if line.is_empty() || line.starts_with('#') {
-                    continue;
-                }
-                if line.starts_with('!') {
-                    continue;
-                }
-                let file_name = path.file_name().unwrap_or_default().to_string_lossy();
-                if wildmatch(line, &file_name) || wildmatch(line, &format!("{}/", file_name)) {
+    if gitignore_path.exists() && let Ok(content) = fs::read_to_string(&gitignore_path) {
+        for line in content.lines() {
+            let line = line.trim();
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
+            if line.starts_with('!') {
+                continue;
+            }
+            let file_name = path.file_name().unwrap_or_default().to_string_lossy();
+            if wildmatch(line, &file_name) || wildmatch(line, &format!("{}/", file_name)) {
+                return true;
+            }
+            if let Ok(rel) = path.strip_prefix(&repo.work_dir) {
+                let rel_str = rel.to_string_lossy();
+                if wildmatch(line, &rel_str) || wildmatch(line, &format!("{}/", rel_str)) {
                     return true;
-                }
-                if let Ok(rel) = path.strip_prefix(&repo.work_dir) {
-                    let rel_str = rel.to_string_lossy();
-                    if wildmatch(line, &rel_str) || wildmatch(line, &format!("{}/", rel_str)) {
-                        return true;
-                    }
                 }
             }
         }
@@ -51,16 +49,13 @@ fn wildmatch(pattern: &str, name: &str) -> bool {
     if pattern == "**" {
         return true;
     }
-    if pattern.starts_with("**/*") {
-        let suffix = &pattern[4..];
+    if let Some(suffix) = pattern.strip_prefix("**/*") {
         return name.ends_with(suffix);
     }
-    if pattern.starts_with('*') {
-        let suffix = &pattern[1..];
+    if let Some(suffix) = pattern.strip_prefix('*') {
         return name.ends_with(suffix);
     }
-    if pattern.ends_with('*') {
-        let prefix = &pattern[..pattern.len() - 1];
+    if let Some(prefix) = pattern.strip_suffix('*') {
         return name.starts_with(prefix);
     }
     if let Some(star_pos) = pattern.find('*') {
@@ -135,7 +130,7 @@ fn add_file(path: &Path, repo: &Repo, index: &mut Index) -> Result<()> {
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            metadata.permissions().readonly() == false
+            !metadata.permissions().readonly()
                 && metadata.permissions().mode() & 0o111 != 0
         }
         #[cfg(not(unix))]

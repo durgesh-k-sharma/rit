@@ -31,7 +31,7 @@ pub fn cmd_status(repo: &Repo) -> Result<()> {
             staged.push((entry.path.clone(), StatusChange::NewFile));
         }
     }
-    for (path, _sha) in &head_entries {
+    for path in head_entries.keys() {
         if index.get(path).is_none() {
             staged.push((path.clone(), StatusChange::Deleted));
         }
@@ -171,10 +171,8 @@ fn walk_for_untracked(repo: &Repo, dir: &std::path::Path, prefix: &str, index: &
 }
 
 fn get_current_branch(repo: &Repo) -> String {
-    if let Ok(head) = refs::read_head(repo) {
-        if let Some(ref_path) = head.strip_prefix("ref: refs/heads/") {
-            return ref_path.to_string();
-        }
+    if let Ok(head) = refs::read_head(repo) && let Some(ref_path) = head.strip_prefix("ref: refs/heads/") {
+        return ref_path.to_string();
     }
     "HEAD".to_string()
 }

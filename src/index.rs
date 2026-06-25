@@ -24,6 +24,12 @@ pub struct Index {
     pub entries: Vec<IndexEntry>,
 }
 
+impl Default for Index {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Index {
     pub fn new() -> Self {
         Index { entries: Vec::new() }
@@ -87,7 +93,7 @@ impl Index {
         for raw in &raw_entries {
             body.extend_from_slice(raw);
             let pad = (8 - (body.len() - entry_offset) % 8) % 8;
-            body.extend(std::iter::repeat(0u8).take(pad));
+            body.extend(std::iter::repeat_n(0u8, pad));
         }
 
         let mut sha1 = Sha1::new();

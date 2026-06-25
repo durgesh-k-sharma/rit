@@ -179,11 +179,7 @@ fn build_tree_from_index(index: &Index, repo: &Repo) -> Result<String> {
 }
 
 fn split_parent(path: &str) -> Option<(String, String)> {
-    if let Some(pos) = path.rfind('/') {
-        Some((path[..pos].to_string(), path[pos + 1..].to_string()))
-    } else {
-        None
-    }
+    path.rfind('/').map(|pos| (path[..pos].to_string(), path[pos + 1..].to_string()))
 }
 
 fn get_author_name(repo: &Repo) -> String {
@@ -215,10 +211,8 @@ fn get_author_email(repo: &Repo) -> String {
 }
 
 fn get_current_branch(repo: &Repo) -> String {
-    if let Ok(head) = refs::read_head(repo) {
-        if let Some(ref_path) = head.strip_prefix("ref: refs/heads/") {
-            return ref_path.to_string();
-        }
+    if let Ok(head) = refs::read_head(repo) && let Some(ref_path) = head.strip_prefix("ref: refs/heads/") {
+        return ref_path.to_string();
     }
     "HEAD".to_string()
 }

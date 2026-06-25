@@ -9,8 +9,7 @@ pub fn cmd_log(repo: &Repo) -> Result<()> {
         Some(sha) => sha,
         None => {
             let branch = get_current_branch(repo);
-            eprintln!("fatal: your current branch '{}' does not have any commits yet", branch);
-            return Ok(());
+            return Err(RitError::NoCommits(branch));
         }
     };
 

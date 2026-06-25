@@ -19,6 +19,9 @@ pub enum RitError {
     #[error("nothing added to commit but untracked files present")]
     NothingToCommit,
 
+    #[error("your current branch '{0}' does not have any commits yet")]
+    NoCommits(String),
+
     #[error("ambiguous object prefix '{0}' matches multiple objects")]
     AmbiguousPrefix(String),
 

@@ -11,7 +11,7 @@ with real git's object store.
 | Staging | ✅ | Index, `rit add` |
 | Snapshot | ✅ | `rit commit`, HEAD, refs |
 | Clarity | ✅ | `rit status`, `rit log`, `rit cat-file` |
-| Branches | 🔜 | `rit branch`, `rit checkout` |
+| Branches | ✅ | `rit branch`, `rit checkout`, working-tree transition |
 | Diff | 🔜 | `rit diff` |
 | Remote | 🔜 | `rit clone`, `rit push`, `rit fetch` |
 

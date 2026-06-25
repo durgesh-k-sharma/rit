@@ -69,7 +69,8 @@ pub fn cmd_log(repo: &Repo) -> Result<()> {
             }
         }
 
-        let date_str = format_timestamp(timestamp, &tz_offset);
+        let date_str = format_timestamp(timestamp, &tz_offset)
+            .unwrap_or_else(|_| String::new());
 
         if decorations.is_empty() {
             println!("commit {}", sha);
@@ -87,14 +88,16 @@ pub fn cmd_log(repo: &Repo) -> Result<()> {
     Ok(())
 }
 
-fn format_timestamp(ts: i64, tz_offset: &str) -> String {
+fn format_timestamp(ts: i64, tz_offset: &str) -> Result<String> {
     use chrono::{DateTime, FixedOffset};
 
-    let utc_dt = DateTime::from_timestamp(ts, 0).unwrap();
+    let utc_dt = DateTime::from_timestamp(ts, 0)
+        .ok_or_else(|| RitError::CorruptObject("invalid timestamp".to_string()))?;
     let offset_secs = parse_tz_offset(tz_offset);
-    let offset = FixedOffset::east_opt(offset_secs).unwrap_or_else(|| FixedOffset::east_opt(0).unwrap());
+    let offset = FixedOffset::east_opt(offset_secs)
+        .ok_or_else(|| RitError::CorruptObject("invalid timezone offset".to_string()))?;
     let local_dt = utc_dt.with_timezone(&offset);
-    local_dt.format("%a %b %e %H:%M:%S %Y %z").to_string()
+    Ok(local_dt.format("%a %b %e %H:%M:%S %Y %z").to_string())
 }
 
 fn parse_tz_offset(s: &str) -> i32 {

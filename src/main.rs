@@ -14,6 +14,10 @@ fn main() -> anyhow::Result<()> {
 
     let result = match cli.command {
         Command::Init { path } => commands::init::cmd_init(path),
+        Command::Add { pathspecs } => {
+            let repo = repo::Repo::find_repository()?;
+            commands::add::cmd_add(&pathspecs, &repo)
+        }
         _ => {
             let _repo = repo::Repo::find_repository()?;
             Ok(())

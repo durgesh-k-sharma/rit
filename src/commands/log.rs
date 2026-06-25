@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::error::*;
 use crate::repo::Repo;
+use crate::object::commit::parse_author_line;
 use crate::object::read_object;
 use crate::refs;
 
@@ -84,20 +85,6 @@ pub fn cmd_log(repo: &Repo) -> Result<()> {
         current_sha = parent;
     }
     Ok(())
-}
-
-fn parse_author_line(line: &str, name: &mut String, email: &mut String, timestamp: &mut i64, tz_offset: &mut String) {
-    if let Some(rest) = line.split_once(" <") {
-        *name = rest.0.to_string();
-        if let Some(rest2) = rest.1.rsplit_once("> ") {
-            *email = rest2.0.to_string();
-            let ts_part = rest2.1;
-            if let Some((ts, tz)) = ts_part.split_once(' ') {
-                *timestamp = ts.parse().unwrap_or(0);
-                *tz_offset = tz.to_string();
-            }
-        }
-    }
 }
 
 fn format_timestamp(ts: i64, tz_offset: &str) -> String {

@@ -187,9 +187,16 @@ fn get_author_name(repo: &Repo) -> String {
         return val;
     }
     if let Ok(config) = std::fs::read_to_string(repo.git_dir.join("config")) {
+        let mut in_user_section = false;
         for line in config.lines() {
-            if let Some(val) = line.trim().strip_prefix("name = ") {
-                return val.trim_matches('"').to_string();
+            let line = line.trim();
+            if line.starts_with('[') {
+                in_user_section = line.eq_ignore_ascii_case("[user]");
+                continue;
+            }
+            if in_user_section
+                && let Some(val) = line.strip_prefix("name = ") {
+                    return val.trim_matches('"').to_string();
             }
         }
     }
@@ -201,9 +208,16 @@ fn get_author_email(repo: &Repo) -> String {
         return val;
     }
     if let Ok(config) = std::fs::read_to_string(repo.git_dir.join("config")) {
+        let mut in_user_section = false;
         for line in config.lines() {
-            if let Some(val) = line.trim().strip_prefix("email = ") {
-                return val.trim_matches('"').to_string();
+            let line = line.trim();
+            if line.starts_with('[') {
+                in_user_section = line.eq_ignore_ascii_case("[user]");
+                continue;
+            }
+            if in_user_section
+                && let Some(val) = line.strip_prefix("email = ") {
+                    return val.trim_matches('"').to_string();
             }
         }
     }

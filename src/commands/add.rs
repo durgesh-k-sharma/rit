@@ -130,8 +130,7 @@ fn add_file(path: &Path, repo: &Repo, index: &mut Index) -> Result<()> {
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            !metadata.permissions().readonly()
-                && metadata.permissions().mode() & 0o111 != 0
+            metadata.permissions().mode() & 0o111 != 0
         }
         #[cfg(not(unix))]
         {
@@ -141,8 +140,8 @@ fn add_file(path: &Path, repo: &Repo, index: &mut Index) -> Result<()> {
     let mode: u32 = if is_exec { 0o100755 } else { 0o100644 };
 
     let epoch = std::time::UNIX_EPOCH;
-    let ctime = metadata.created().unwrap_or(SystemTime::now());
-    let mtime = metadata.modified().unwrap_or(SystemTime::now());
+    let ctime = metadata.created().unwrap_or(SystemTime::UNIX_EPOCH);
+    let mtime = metadata.modified().unwrap_or(SystemTime::UNIX_EPOCH);
     let ctime_sec = ctime.duration_since(epoch).unwrap_or_default().as_secs() as u32;
     let ctime_nsec = ctime.duration_since(epoch).unwrap_or_default().subsec_nanos();
     let mtime_sec = mtime.duration_since(epoch).unwrap_or_default().as_secs() as u32;

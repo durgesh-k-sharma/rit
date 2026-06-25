@@ -85,7 +85,7 @@ impl Index {
         sorted.sort_by(|a, b| a.path.cmp(&b.path));
         let mut raw_entries = Vec::new();
         for entry in &sorted {
-            let raw = serialize_entry(entry);
+            let raw = serialize_entry(entry)?;
             raw_entries.push(raw);
         }
 
@@ -155,7 +155,7 @@ fn parse_entry(data: &[u8]) -> Result<(usize, IndexEntry)> {
     }))
 }
 
-fn serialize_entry(entry: &IndexEntry) -> Vec<u8> {
+fn serialize_entry(entry: &IndexEntry) -> Result<Vec<u8>> {
     let mut buf = Vec::new();
     buf.extend_from_slice(&entry.ctime_sec.to_be_bytes());
     buf.extend_from_slice(&entry.ctime_nsec.to_be_bytes());
@@ -167,11 +167,12 @@ fn serialize_entry(entry: &IndexEntry) -> Vec<u8> {
     buf.extend_from_slice(&entry.uid.to_be_bytes());
     buf.extend_from_slice(&entry.gid.to_be_bytes());
     buf.extend_from_slice(&entry.file_size.to_be_bytes());
-    buf.extend_from_slice(&hex::decode(&entry.sha).unwrap());
+    buf.extend_from_slice(&hex::decode(&entry.sha)
+        .map_err(|_| RitError::CorruptIndex)?);
     let name_len = std::cmp::min(entry.path.len(), 0xFFF) as u16;
     buf.extend_from_slice(&name_len.to_be_bytes());
     buf.extend_from_slice(entry.path.as_bytes());
-    buf
+    Ok(buf)
 }
 
 #[cfg(test)]

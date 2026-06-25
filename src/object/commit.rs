@@ -97,8 +97,7 @@ impl Commit {
     }
 }
 
-#[allow(dead_code)]
-fn parse_author_line(line: &str, name: &mut String, email: &mut String, timestamp: &mut i64, tz_offset: &mut String) {
+pub(crate) fn parse_author_line(line: &str, name: &mut String, email: &mut String, timestamp: &mut i64, tz_offset: &mut String) {
     if let Some(rest) = line.split_once(" <") {
         *name = rest.0.to_string();
         if let Some(rest2) = rest.1.rsplit_once("> ") {

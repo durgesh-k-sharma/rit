@@ -167,8 +167,8 @@ fn replace_index(repo: &Repo, target_files: &BTreeMap<PathBuf, (String, u32)>) -
 
         let relative_str = path.to_string_lossy().replace('\\', "/");
         let epoch = std::time::UNIX_EPOCH;
-        let ctime = metadata.created().unwrap_or(std::time::SystemTime::now());
-        let mtime = metadata.modified().unwrap_or(std::time::SystemTime::now());
+        let ctime = metadata.created().unwrap_or(std::time::SystemTime::UNIX_EPOCH);
+        let mtime = metadata.modified().unwrap_or(std::time::SystemTime::UNIX_EPOCH);
         let ctime_sec = ctime.duration_since(epoch).unwrap_or_default().as_secs() as u32;
         let ctime_nsec = ctime.duration_since(epoch).unwrap_or_default().subsec_nanos();
         let mtime_sec = mtime.duration_since(epoch).unwrap_or_default().as_secs() as u32;

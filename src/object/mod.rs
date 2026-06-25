@@ -155,7 +155,9 @@ fn resolve_prefix_raw(git_dir: &Path, prefix: &str) -> Result<String> {
     }
     match matches.len() {
         0 => Err(RitError::ObjectNotFound(prefix.to_string())),
-        1 => Ok(matches.into_iter().next().unwrap()),
+        1 => Ok(matches.into_iter().next().ok_or_else(|| {
+            RitError::CorruptObject(prefix.to_string())
+        })?),
         _ => Err(RitError::AmbiguousPrefix(prefix.to_string())),
     }
 }

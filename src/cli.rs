@@ -33,11 +33,11 @@ pub enum Command {
     /// Provide content or type information for repository objects
     #[command(name = "cat-file")]
     CatFile {
-        #[arg(short = 't')]
+        #[arg(short = 't', conflicts_with_all = ["pretty_print", "size"])]
         type_only: bool,
-        #[arg(short = 'p')]
+        #[arg(short = 'p', conflicts_with_all = ["type_only", "size"])]
         pretty_print: bool,
-        #[arg(short = 's')]
+        #[arg(short = 's', conflicts_with_all = ["type_only", "pretty_print"])]
         size: bool,
         object: String,
     },

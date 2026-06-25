@@ -11,6 +11,9 @@ fn is_ignored(path: &Path, repo: &Repo) -> bool {
     if path.components().any(|c| c.as_os_str() == ".git") {
         return true;
     }
+    if path == repo.work_dir {
+        return false;
+    }
     let gitignore_path = repo.work_dir.join(".gitignore");
     if gitignore_path.exists() {
         if let Ok(content) = fs::read_to_string(&gitignore_path) {
@@ -23,8 +26,14 @@ fn is_ignored(path: &Path, repo: &Repo) -> bool {
                     continue;
                 }
                 let file_name = path.file_name().unwrap_or_default().to_string_lossy();
-                if wildmatch(line, &file_name) {
+                if wildmatch(line, &file_name) || wildmatch(line, &format!("{}/", file_name)) {
                     return true;
+                }
+                if let Ok(rel) = path.strip_prefix(&repo.work_dir) {
+                    let rel_str = rel.to_string_lossy();
+                    if wildmatch(line, &rel_str) || wildmatch(line, &format!("{}/", rel_str)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -39,6 +48,9 @@ fn wildmatch(pattern: &str, name: &str) -> bool {
     if pattern == "*" {
         return true;
     }
+    if pattern == "**" {
+        return true;
+    }
     if pattern.starts_with("**/*") {
         let suffix = &pattern[4..];
         return name.ends_with(suffix);
@@ -50,6 +62,12 @@ fn wildmatch(pattern: &str, name: &str) -> bool {
     if pattern.ends_with('*') {
         let prefix = &pattern[..pattern.len() - 1];
         return name.starts_with(prefix);
+    }
+    if let Some(star_pos) = pattern.find('*') {
+        let prefix = &pattern[..star_pos];
+        let suffix = &pattern[star_pos + 1..];
+        return name.starts_with(prefix) && name.ends_with(suffix)
+            && name.len() >= prefix.len() + suffix.len();
     }
     false
 }
@@ -81,6 +99,9 @@ pub fn cmd_add(pathspecs: &[std::path::PathBuf], repo: &Repo) -> Result<()> {
 }
 
 fn add_directory(dir: &Path, repo: &Repo, index: &mut Index) -> Result<()> {
+    if is_ignored(dir, repo) {
+        return Ok(());
+    }
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
         let path = entry.path();
@@ -110,19 +131,18 @@ fn add_file(path: &Path, repo: &Repo, index: &mut Index) -> Result<()> {
         .unwrap_or(path);
     let relative_str = relative.to_string_lossy().replace('\\', "/");
 
-    let is_exec = metadata.permissions().readonly() == false
-        && cfg!(unix)
-        && {
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                metadata.permissions().mode() & 0o111 != 0
-            }
-            #[cfg(not(unix))]
-            {
-                false
-            }
-        };
+    let is_exec = {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            metadata.permissions().readonly() == false
+                && metadata.permissions().mode() & 0o111 != 0
+        }
+        #[cfg(not(unix))]
+        {
+            false
+        }
+    };
     let mode: u32 = if is_exec { 0o100755 } else { 0o100644 };
 
     let epoch = std::time::UNIX_EPOCH;

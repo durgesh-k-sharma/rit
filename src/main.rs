@@ -4,6 +4,7 @@ mod repo;
 mod object;
 mod refs;
 mod index;
+mod checkout;
 mod commands;
 
 use clap::Parser;

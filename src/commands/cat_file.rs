@@ -2,6 +2,7 @@ use crate::error::*;
 use crate::repo::Repo;
 use crate::object::read_object;
 use crate::object::tree::Tree;
+use std::io::Write;
 
 pub fn cmd_cat_file(
     type_only: bool,
@@ -19,7 +20,7 @@ pub fn cmd_cat_file(
     } else if pretty_print {
         match obj_type.as_str() {
             "blob" => {
-                print!("{}", String::from_utf8_lossy(&content));
+                std::io::stdout().write_all(&content)?;
             }
             "tree" => {
                 let tree = Tree::parse(&content);

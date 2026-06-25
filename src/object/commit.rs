@@ -24,6 +24,7 @@ impl Commit {
         Commit { tree, parent, author_name, author_email, timestamp, tz_offset, message }
     }
 
+    #[allow(dead_code)]
     pub fn hash(&self) -> String {
         let content = self.serialize_content();
         let header = format!("commit {}\0", content.len());
@@ -57,6 +58,7 @@ impl Commit {
         buf
     }
 
+    #[allow(dead_code)]
     pub fn parse(content: &[u8]) -> Self {
         let text = String::from_utf8_lossy(content);
         let mut tree = String::new();
@@ -95,6 +97,7 @@ impl Commit {
     }
 }
 
+#[allow(dead_code)]
 fn parse_author_line(line: &str, name: &mut String, email: &mut String, timestamp: &mut i64, tz_offset: &mut String) {
     if let Some(rest) = line.split_once(" <") {
         *name = rest.0.to_string();

@@ -139,12 +139,12 @@ fn read_tree_entries(repo: &Repo, tree_sha: &str, prefix: &str) -> Result<HashMa
 
 fn find_untracked_files(repo: &Repo, index: &Index) -> Vec<String> {
     let mut untracked = Vec::new();
-    walk_for_untracked(repo, &repo.work_dir, "", repo, index, &mut untracked);
+    walk_for_untracked(repo, &repo.work_dir, "", index, &mut untracked);
     untracked.sort();
     untracked
 }
 
-fn walk_for_untracked(repo: &Repo, dir: &std::path::Path, prefix: &str, _repo: &Repo, index: &Index, untracked: &mut Vec<String>) {
+fn walk_for_untracked(repo: &Repo, dir: &std::path::Path, prefix: &str, index: &Index, untracked: &mut Vec<String>) {
     if let Ok(entries) = fs::read_dir(dir) {
         for entry in entries.flatten() {
             let path = entry.path();
@@ -161,7 +161,7 @@ fn walk_for_untracked(repo: &Repo, dir: &std::path::Path, prefix: &str, _repo: &
 
             if path.is_dir() {
                 if index.get(&relative).is_none() {
-                    walk_for_untracked(repo, &path, &relative, repo, index, untracked);
+                    walk_for_untracked(repo, &path, &relative, index, untracked);
                 }
             } else if index.get(&relative).is_none() {
                 untracked.push(relative);

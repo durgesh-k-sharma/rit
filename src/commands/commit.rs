@@ -65,6 +65,24 @@ fn build_tree_from_index(index: &Index, repo: &Repo) -> Result<String> {
         }
     }
 
+    // Ensure all ancestor directories exist in dir_entries
+    let ancestor_dirs: Vec<String> = dir_entries.keys()
+        .flat_map(|dir| {
+            let mut ancestors = Vec::new();
+            let mut current = dir.clone();
+            while let Some((parent, _)) = split_parent(&current) {
+                if !ancestors.contains(&parent) {
+                    ancestors.push(parent.clone());
+                }
+                current = parent;
+            }
+            ancestors
+        })
+        .collect();
+    for dir in ancestor_dirs {
+        dir_entries.entry(dir).or_default();
+    }
+
     let mut tree_cache: HashMap<String, String> = HashMap::new();
 
     let mut dirs: Vec<String> = dir_entries.keys().cloned().collect();

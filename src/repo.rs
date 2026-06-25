@@ -28,6 +28,7 @@ impl Repo {
         self.git_dir.join("objects")
     }
 
+    #[allow(dead_code)]
     pub fn refs_path(&self) -> PathBuf {
         self.git_dir.join("refs")
     }

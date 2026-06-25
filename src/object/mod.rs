@@ -11,6 +11,7 @@ use flate2::Compression;
 use crate::error::*;
 use crate::repo::Repo;
 
+#[allow(dead_code)]
 pub enum GitObject {
     Blob(blob::Blob),
     Tree(tree::Tree),

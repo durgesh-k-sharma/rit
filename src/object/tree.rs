@@ -33,6 +33,7 @@ impl Tree {
         Tree { entries }
     }
 
+    #[allow(dead_code)]
     pub fn hash(&self) -> String {
         let content = self.serialize_content();
         let header = format!("tree {}\0", content.len());

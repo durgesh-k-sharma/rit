@@ -16,7 +16,7 @@ pub enum RitError {
     #[error("index checksum mismatch — index file is corrupt")]
     CorruptIndex,
 
-    #[error("nothing added to commit but untracked files present")]
+    #[error("nothing to commit")]
     NothingToCommit,
 
     #[error("your current branch '{0}' does not have any commits yet")]

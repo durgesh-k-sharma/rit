@@ -6,6 +6,7 @@ pub struct Blob {
 }
 
 impl Blob {
+    #[allow(dead_code)]
     pub fn hash(&self) -> String {
         let header = format!("blob {}\0", self.content.len());
         let mut sha1 = Sha1::new();

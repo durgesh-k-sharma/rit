@@ -92,8 +92,7 @@ impl Index {
 
         let mut sha1 = Sha1::new();
         sha1.update(&body);
-        let checksum = hex::encode(sha1.digest().bytes());
-        body.extend_from_slice(&hex::decode(&checksum).unwrap());
+        body.extend_from_slice(&sha1.digest().bytes());
 
         let index_path = repo.git_dir.join("index");
         fs::write(&index_path, &body)?;
@@ -136,9 +135,12 @@ fn parse_entry(data: &[u8]) -> Result<(usize, IndexEntry)> {
     let flags = u16::from_be_bytes([data[60], data[61]]);
     let name_len = (flags & 0x0FFF) as usize;
 
-    let path_start = 62;
-    let path_end = path_start + name_len;
-    let path = String::from_utf8_lossy(&data[path_start..path_end]).to_string();
+        let path_start = 62;
+        if path_start + name_len > data.len() {
+            return Err(RitError::CorruptIndex);
+        }
+        let path_end = path_start + name_len;
+        let path = String::from_utf8_lossy(&data[path_start..path_end]).to_string();
 
     let entry_size = (62 + name_len + 7) & !7;
     Ok((entry_size, IndexEntry {

@@ -137,7 +137,7 @@ fn atomic_write(path: &Path, content: &[u8]) -> Result<()> {
         .map(|_| fastrand::alphanumeric())
         .take(8)
         .collect();
-    let tmp_path = path.with_extension(format!(".rit_tmp_{}", rand_suffix));
+    let tmp_path = path.with_extension(format!("rit_tmp_{}", rand_suffix));
     fs::write(&tmp_path, content)?;
     fs::rename(&tmp_path, path)?;
     Ok(())

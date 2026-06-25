@@ -61,7 +61,6 @@ pub fn update_head_ref(repo: &Repo, sha: &str) -> Result<()> {
     Ok(())
 }
 
-#[allow(dead_code)]
 pub fn list_local_branches(git_dir: &Path) -> Result<Vec<String>> {
     let heads_dir = git_dir.join("refs").join("heads");
     if !heads_dir.is_dir() {
@@ -78,12 +77,10 @@ pub fn list_local_branches(git_dir: &Path) -> Result<Vec<String>> {
     Ok(branches)
 }
 
-#[allow(dead_code)]
 pub fn branch_exists(git_dir: &Path, name: &str) -> bool {
     git_dir.join("refs").join("heads").join(name).exists()
 }
 
-#[allow(dead_code)]
 pub fn delete_branch(git_dir: &Path, name: &str) -> Result<()> {
     let path = git_dir.join("refs").join("heads").join(name);
     if !path.exists() {
@@ -93,7 +90,6 @@ pub fn delete_branch(git_dir: &Path, name: &str) -> Result<()> {
     Ok(())
 }
 
-#[allow(dead_code)]
 pub fn current_branch_name(git_dir: &Path) -> Result<Option<String>> {
     let head_path = git_dir.join("HEAD");
     if !head_path.exists() {

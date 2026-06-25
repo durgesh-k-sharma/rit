@@ -31,9 +31,6 @@ pub fn cmd_checkout(
 
         if current_branch.as_deref() == Some(target) {
             println!("Already on '{}'", target);
-            let sha = refs::resolve_head(repo)?
-                .ok_or_else(|| RitError::NoCommits(target.to_string()))?;
-            checkout::switch_to_branch(repo, target, &sha, force)?;
             return Ok(());
         }
 

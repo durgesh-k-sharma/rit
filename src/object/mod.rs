@@ -112,7 +112,6 @@ fn decompress(data: &[u8]) -> std::io::Result<Vec<u8>> {
     Ok(buf)
 }
 
-#[allow(dead_code)]
 pub fn read_object_raw(git_dir: &Path, sha_or_prefix: &str) -> Result<(String, Vec<u8>, String)> {
     let full_sha = resolve_prefix_raw(git_dir, sha_or_prefix)?;
     let dir = git_dir.join("objects").join(&full_sha[..2]);
@@ -130,7 +129,6 @@ pub fn read_object_raw(git_dir: &Path, sha_or_prefix: &str) -> Result<(String, V
     Ok((obj_type, content, full_sha))
 }
 
-#[allow(dead_code)]
 fn resolve_prefix_raw(git_dir: &Path, prefix: &str) -> Result<String> {
     if prefix.len() >= 40 {
         return Ok(prefix[..40].to_string());
@@ -162,7 +160,6 @@ fn resolve_prefix_raw(git_dir: &Path, prefix: &str) -> Result<String> {
     }
 }
 
-#[allow(dead_code)]
 pub fn flatten_tree(
     git_dir: &Path,
     tree_sha: &str,

@@ -26,6 +26,10 @@ fn main() -> anyhow::Result<()> {
             let repo = repo::Repo::find_repository()?;
             commands::status::cmd_status(&repo)
         }
+        Command::Log => {
+            let repo = repo::Repo::find_repository()?;
+            commands::log::cmd_log(&repo)
+        }
         _ => {
             let _repo = repo::Repo::find_repository()?;
             Ok(())

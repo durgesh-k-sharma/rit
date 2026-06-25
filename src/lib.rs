@@ -1,3 +1,4 @@
+pub mod checkout;
 pub mod cli;
 pub mod error;
 pub mod repo;
